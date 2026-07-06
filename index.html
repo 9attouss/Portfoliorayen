@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mohamed Rayen Akrout — Video Editor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --bg: #0d0c0e;
+    --surface: #17151a;
+    --surface-2: #1f1c22;
+    --hairline: #322e35;
+    --gold: #c9a15a;
+    --crimson: #8a2f2f;
+    --text: #ece7de;
+    --text-muted: #8b8590;
+    --text-dim: #57525c;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  html{ scroll-behavior:smooth; }
+
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    overflow-x:hidden;
+    position:relative;
+  }
+
+  /* subtle film grain */
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    pointer-events:none;
+    z-index:999;
+    opacity:.035;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+
+  ::selection{ background:var(--gold); color:#161217; }
+
+  a{ color:inherit; text-decoration:none; }
+
+  /* ---------- TIMELINE NAV ---------- */
+  .timeline-nav{
+    position:fixed; top:0; left:0; right:0;
+    z-index:100;
+    background:rgba(13,12,14,.9);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--hairline);
+  }
+
+  .timeline-track{
+    position:relative;
+    height:3px;
+    background:var(--surface-2);
+  }
+
+  .timeline-fill{
+    position:absolute; top:0; left:0; height:100%;
+    background:linear-gradient(90deg, var(--crimson), var(--gold));
+    width:0%;
+    transition:width .1s linear;
+  }
+
+  .timeline-playhead{
+    position:absolute; top:-4px;
+    width:2px; height:11px;
+    background:var(--gold);
+    box-shadow:0 0 8px var(--gold);
+    transform:translateX(-1px);
+    left:0%;
+    transition:left .1s linear;
+  }
+
+  .timeline-chapters{
+    display:flex; align-items:center; justify-content:space-between;
+    max-width:1160px; margin:0 auto;
+    padding:14px 24px;
+  }
+
+  .tc-brand{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:700;
+    font-size:15px;
+    letter-spacing:.06em;
+    color:var(--text);
+  }
+
+  .tc-brand span{ color:var(--gold); }
+
+  .tc-links{
+    display:flex; gap:28px;
+    list-style:none;
+  }
+
+  .tc-links li a{
+    font-size:11px;
+    letter-spacing:.12em;
+    color:var(--text-muted);
+    display:flex; align-items:baseline; gap:8px;
+    transition:color .2s;
+  }
+
+  .tc-links li a .tc-code{
+    color:var(--text-dim);
+    font-size:10px;
+  }
+
+  .tc-links li a:hover, .tc-links li a.active{ color:var(--gold); }
+  .tc-links li a:hover .tc-code, .tc-links li a.active .tc-code{ color:var(--crimson); }
+
+  @media (max-width:720px){
+    .tc-links{ display:none; }
+  }
+
+  /* ---------- SECTIONS ---------- */
+  section{
+    max-width:1160px;
+    margin:0 auto;
+    padding:0 24px;
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    min-height:100vh;
+    display:flex; flex-direction:column; justify-content:center;
+    padding-top:80px;
+    position:relative;
+  }
+
+  .slate-frame{
+    border:1px solid var(--hairline);
+    padding:32px clamp(20px,4vw,48px);
+    position:relative;
+    background:linear-gradient(180deg, rgba(201,161,90,.03), transparent 40%);
+  }
+
+  .slate-frame::before, .slate-frame::after{
+    content:"";
+    position:absolute;
+    width:18px; height:18px;
+    border:1px solid var(--gold);
+    opacity:.5;
+  }
+  .slate-frame::before{ top:-1px; left:-1px; border-right:none; border-bottom:none; }
+  .slate-frame::after{ bottom:-1px; right:-1px; border-left:none; border-top:none; }
+
+  .slate-row{
+    display:flex; flex-wrap:wrap; gap:10px 28px;
+    margin-bottom:28px;
+    font-size:11px; letter-spacing:.1em;
+    color:var(--text-dim);
+  }
+  .slate-row span b{ color:var(--text-muted); font-weight:500; }
+
+  .hero-name{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:800;
+    font-size:clamp(48px, 9vw, 118px);
+    line-height:.92;
+    letter-spacing:-.01em;
+    text-transform:uppercase;
+  }
+
+  .hero-name .last{ color:var(--gold); }
+
+  .hero-role{
+    margin-top:20px;
+    display:flex; align-items:center; gap:14px;
+    font-size:clamp(14px,2vw,18px);
+    color:var(--text-muted);
+  }
+
+  .rec-dot{
+    width:8px; height:8px; border-radius:50%;
+    background:var(--crimson);
+    box-shadow:0 0 10px var(--crimson);
+    animation:blink 2s infinite;
+    flex-shrink:0;
+  }
+
+  @keyframes blink{
+    0%,100%{ opacity:1; }
+    50%{ opacity:.25; }
+  }
+
+  .scroll-cue{
+    margin-top:60px;
+    display:flex; align-items:center; gap:12px;
+    font-size:10px; letter-spacing:.15em;
+    color:var(--text-dim);
+  }
+
+  .scroll-cue .bar{
+    width:1px; height:34px;
+    background:var(--hairline);
+    position:relative;
+    overflow:hidden;
+  }
+  .scroll-cue .bar::after{
+    content:"";
+    position:absolute; top:-100%; left:0;
+    width:100%; height:100%;
+    background:var(--gold);
+    animation:scrollbar 1.8s infinite;
+  }
+  @keyframes scrollbar{
+    0%{ top:-100%; }
+    100%{ top:100%; }
+  }
+
+  /* ---------- SECTION HEADERS ---------- */
+  .sec-head{
+    display:flex; align-items:baseline; gap:16px;
+    margin-bottom:52px;
+  }
+
+  .sec-num{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--crimson);
+  }
+
+  .sec-title{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:700;
+    font-size:clamp(30px,4vw,44px);
+    text-transform:uppercase;
+    letter-spacing:.01em;
+  }
+
+  .sec-line{
+    flex:1;
+    height:1px;
+    background:var(--hairline);
+  }
+
+  /* ---------- WORK ---------- */
+  .work{ padding-top:140px; padding-bottom:100px; }
+
+  .reel{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:2px;
+    background:var(--hairline);
+    border:1px solid var(--hairline);
+  }
+
+  @media (max-width:720px){
+    .reel{ grid-template-columns:1fr; }
+  }
+
+  .clip{
+    background:var(--surface);
+    position:relative;
+    opacity:0;
+    transform:translateY(24px);
+    transition:opacity .6s ease, transform .6s ease;
+  }
+  .clip.in-view{ opacity:1; transform:translateY(0); }
+
+  .clip-frame{
+    aspect-ratio:16/9;
+    position:relative;
+    background:
+      repeating-linear-gradient(115deg, rgba(255,255,255,.02) 0 2px, transparent 2px 6px),
+      linear-gradient(150deg, #201c24, #121014);
+    overflow:hidden;
+    cursor:pointer;
+  }
+
+  .clip-frame iframe{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    border:0;
+    display:none;
+  }
+
+  .clip-frame.loaded .clip-placeholder{ display:none; }
+  .clip-frame.loaded iframe{ display:block; }
+
+  .clip-placeholder{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:14px;
+  }
+
+  .play-btn{
+    width:56px; height:56px;
+    border-radius:50%;
+    border:1px solid var(--gold);
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .25s, background .25s;
+  }
+  .clip-frame:hover .play-btn{
+    transform:scale(1.08);
+    background:rgba(201,161,90,.1);
+  }
+
+  .play-btn svg{ width:16px; height:16px; fill:var(--gold); margin-left:2px; }
+
+  .placeholder-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    letter-spacing:.1em;
+    color:var(--text-dim);
+    text-align:center;
+    padding:0 20px;
+  }
+
+  .frame-tc{
+    position:absolute; top:10px; left:12px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    color:var(--text-dim);
+    letter-spacing:.05em;
+  }
+
+  .frame-tag{
+    position:absolute; top:10px; right:12px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:9px;
+    letter-spacing:.1em;
+    padding:3px 8px;
+    border:1px solid var(--hairline);
+    color:var(--text-muted);
+    background:rgba(13,12,14,.6);
+  }
+
+  .clip-meta{
+    padding:18px 20px 22px;
+    border-top:1px solid var(--hairline);
+  }
+
+  .clip-title{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:600;
+    font-size:22px;
+    text-transform:uppercase;
+    letter-spacing:.01em;
+    margin-bottom:6px;
+  }
+
+  .clip-desc{
+    font-size:13px;
+    color:var(--text-muted);
+    line-height:1.5;
+  }
+
+  .edit-note{
+    margin-top:36px;
+    font-size:11px;
+    color:var(--text-dim);
+    font-family:'IBM Plex Mono', monospace;
+    border-left:2px solid var(--crimson);
+    padding-left:14px;
+    line-height:1.7;
+  }
+
+  /* ---------- ABOUT ---------- */
+  .about{ padding:80px 24px 100px; }
+
+  .about-grid{
+    display:grid;
+    grid-template-columns:1fr 1.4fr;
+    gap:56px;
+  }
+
+  @media (max-width:820px){
+    .about-grid{ grid-template-columns:1fr; }
+  }
+
+  .about-tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--gold);
+    letter-spacing:.1em;
+    display:block;
+    margin-bottom:18px;
+  }
+
+  .about-text p{
+    font-size:16px;
+    line-height:1.75;
+    color:var(--text-muted);
+    margin-bottom:20px;
+    max-width:60ch;
+  }
+
+  .about-text strong{ color:var(--text); font-weight:600; }
+
+  .about-stats{
+    display:flex; flex-direction:column; gap:0;
+    border-top:1px solid var(--hairline);
+  }
+
+  .stat-row{
+    display:flex; justify-content:space-between;
+    padding:16px 0;
+    border-bottom:1px solid var(--hairline);
+    font-size:13px;
+  }
+
+  .stat-row .label{ color:var(--text-dim); letter-spacing:.08em; text-transform:uppercase; font-size:11px; }
+  .stat-row .val{ color:var(--text); font-family:'IBM Plex Mono', monospace; font-size:12px; }
+
+  /* ---------- CONTACT ---------- */
+  .contact{
+    padding:60px 24px 140px;
+    text-align:center;
+  }
+
+  .contact-title{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:800;
+    font-size:clamp(36px,6vw,72px);
+    text-transform:uppercase;
+    line-height:1;
+    margin-bottom:28px;
+  }
+
+  .contact-title .cut{ color:var(--gold); }
+
+  .contact-sub{
+    color:var(--text-muted);
+    font-size:15px;
+    max-width:44ch;
+    margin:0 auto 40px;
+    line-height:1.6;
+  }
+
+  .contact-btn{
+    display:inline-flex; align-items:center; gap:12px;
+    padding:16px 32px;
+    border:1px solid var(--gold);
+    color:var(--gold);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    letter-spacing:.08em;
+    transition:background .25s, color .25s;
+  }
+
+  .contact-btn:hover{
+    background:var(--gold);
+    color:#161217;
+  }
+
+  footer{
+    border-top:1px solid var(--hairline);
+    padding:24px;
+    text-align:center;
+    font-size:10px;
+    letter-spacing:.1em;
+    color:var(--text-dim);
+    font-family:'IBM Plex Mono', monospace;
+  }
+
+</style>
+</head>
+<body>
+
+  <!-- TIMELINE NAV -->
+  <nav class="timeline-nav">
+    <div class="timeline-chapters">
+      <div class="tc-brand">M.R<span>.</span>AKROUT</div>
+      <ul class="tc-links">
+        <li><a href="#hero" class="nav-link active"><span class="tc-code">00:00</span>HOME</a></li>
+        <li><a href="#work" class="nav-link"><span class="tc-code">00:15</span>WORK</a></li>
+        <li><a href="#about" class="nav-link"><span class="tc-code">00:32</span>ABOUT</a></li>
+        <li><a href="#contact" class="nav-link"><span class="tc-code">00:48</span>CONTACT</a></li>
+      </ul>
+    </div>
+    <div class="timeline-track">
+      <div class="timeline-fill" id="timelineFill"></div>
+      <div class="timeline-playhead" id="timelinePlayhead"></div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="slate-frame">
+      <div class="slate-row">
+        <span><b>ROLE</b> — EDITOR</span>
+        <span><b>TOOL</b> — PREMIERE PRO</span>
+        <span><b>STATUS</b> — SELF-TAUGHT</span>
+        <span><b>TAKE</b> — 001</span>
+        <span><b>DATE</b> — 2026</span>
+      </div>
+      <h1 class="hero-name">MOHAMED RAYEN<br><span class="last">AKROUT</span></h1>
+      <div class="hero-role">
+        <span class="rec-dot"></span>
+        Video Editor — cutting across narrative, social, and branded work
+      </div>
+      <div class="scroll-cue">
+        <div class="bar"></div>
+        SCROLL
+      </div>
+    </div>
+  </section>
+
+  <!-- WORK -->
+  <section class="work" id="work">
+    <div class="sec-head">
+      <span class="sec-num">01</span>
+      <h2 class="sec-title">Selected Work</h2>
+      <div class="sec-line"></div>
+    </div>
+
+    <div class="reel">
+
+      <!-- CLIP 01 -->
+      <div class="clip">
+        <div class="clip-frame" onclick="loadClip(this, 'https://www.youtube-nocookie.com/embed/6molDu7EcDo')">
+          <span class="frame-tc mono">00:00:04:12</span>
+          <span class="frame-tag">MUSIC VIDEO</span>
+          <div class="clip-placeholder">
+            <div class="play-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+            <span class="placeholder-label">CLICK TO<br>PLAY</span>
+          </div>
+        </div>
+        <div class="clip-meta">
+          <div class="clip-title">Enactus Meet The Team</div>
+          <div class="clip-desc"> Meet the team music video for enactors club , i had only 24 hours deadline ,scripting ,shooting,editing all done by me, i used Adobe adobe premier.</div>
+        </div>
+      </div>
+
+      <!-- CLIP 02 -->
+      <div class="clip">
+        <div class="clip-frame" onclick="loadClip(this, 'https://www.youtube-nocookie.com/embed/fDIT9AaqdmA')">
+          <span class="frame-tc mono">00:01:22:03</span>
+          <span class="frame-tag">BRANDED</span>
+          <div class="clip-placeholder">
+            <div class="play-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+            <span class="placeholder-label">CLICK TO<br>PLAY</span>
+          </div>
+        </div>
+        <div class="clip-meta">
+          <div class="clip-title">ENACTUS</div>
+          <div class="clip-desc">ENACTUS LOGO ANIMATION, ADOBE AFTER EFFECTS.</div>
+        </div>
+      </div>
+
+      <!-- CLIP 03 -->
+      <div class="clip">
+        <div class="clip-frame" onclick="loadClip(this, 'https://www.youtube-nocookie.com/embed/e0wWnAOcXKc')">
+          <span class="frame-tc mono">00:00:47:19</span>
+          <span class="frame-tag">BRANDED</span>
+          <div class="clip-placeholder">
+            <div class="play-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+            <span class="placeholder-label">CLICK TO<br>PLAY</span>
+          </div>
+        </div>
+        <div class="clip-meta">
+          <div class="clip-title">NATURE LOGO AE</div>
+          <div class="clip-desc">A RANDOM PROJECT ON YOUTUBE AE ANIMATION — APPLYING WHAT I LEARNED, Adobe AFTER EFFECTS.</div>
+        </div>
+      </div>
+
+      <!-- CLIP 04 -->
+      <div class="clip">
+        <div class="clip-frame" onclick="loadClip(this, 'https://www.youtube-nocookie.com/embed/p87HrW17i9g?si=_mG0MBKH2XzTar-z')">
+          <span class="frame-tc mono">00:02:05:08</span>
+          <span class="frame-tag">SHORT-FORM</span>
+          <div class="clip-placeholder">
+            <div class="play-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+            <span class="placeholder-label">CLICK TO<br>PLAY</span>
+          </div>
+        </div>
+        <div class="clip-meta">
+          <div class="clip-title">LAUNCH DAY</div>
+          <div class="clip-desc">ENACTUS LAUNCH DAY VIDEO  — DESCRIBING THE BORING ROOTINE OF A STUDENT, A 1 DAY DEADLINE, ADOBE PREMIER PRO,OBS,AFTER EFFECTS.</div>
+        </div>
+      </div>
+
+    </div>
+
+   
+  </section>
+
+  <!-- ABOUT -->
+  <section class="about" id="about">
+    <div class="sec-head">
+      <span class="sec-num">02</span>
+      <h2 class="sec-title">About</h2>
+      <div class="sec-line"></div>
+    </div>
+
+    <div class="about-grid">
+      <div>
+        <span class="about-tag">// NO FILM SCHOOL, JUST HOURS IN THE TIMELINE</span>
+        <div class="about-stats">
+          <div class="stat-row"><span class="label">Background</span><span class="val">SELF-TAUGHT</span></div>
+          <div class="stat-row"><span class="label">Main Tool</span><span class="val">PREMIERE PRO</span></div>
+          <div class="stat-row"><span class="label">Focus</span><span class="val">MIX / GENRE-AGNOSTIC</span></div>
+          <div class="stat-row"><span class="label">Based</span><span class="val">TUNIS, TN</span></div>
+        </div>
+      </div>
+      <div class="about-text">
+        <p>I'm <strong>Mohamed Rayen Akrout</strong>, a self-taught video editor. I didn't learn this craft in a classroom — I learned it by opening the software, making mistakes, and figuring out why a cut works before I could name the technique.</p>
+        <p>That path keeps me curious. I move across <strong>short-form, narrative, branded, and music video</strong> work because I like learning the rhythm each format demands, rather than settling into one lane too early.</p>
+        <p>I'm early in my career, but every project is treated as the next rung — a chance to tighten pacing, sharpen sound design, and get closer to cuts that disappear into the story instead of calling attention to themselves.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact" id="contact">
+    <div class="sec-head" style="justify-content:center;">
+      <span class="sec-num">03</span>
+      <h2 class="sec-title">Contact</h2>
+      <div class="sec-line"></div>
+    </div>
+    <h3 class="contact-title">LET'S CUT<br>SOMETHING<span class="cut"> TOGETHER.</span></h3>
+    <p class="contact-sub">Have a project in mind? Send over the footage, the reference, or just the idea — I'll take it from there.</p>
+    <a class="contact-btn" href="mailto:mouhammedrayenakrout@gmail.com">
+      mouhammedrayenakrout@gmail.com →
+    </a>
+  </section>
+
+  <footer>
+    MOHAMED RAYEN AKROUT — VIDEO EDITOR — © 2026
+  </footer>
+
+<script>
+  // timeline scrubber progress
+  const fill = document.getElementById('timelineFill');
+  const playhead = document.getElementById('timelinePlayhead');
+  const navLinks = document.querySelectorAll('.nav-link');
+  const sections = ['hero','work','about','contact'].map(id => document.getElementById(id));
+
+  function onScroll(){
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    fill.style.width = pct + '%';
+    playhead.style.left = pct + '%';
+
+    let current = sections[0];
+    sections.forEach(sec => {
+      if (scrollTop >= sec.offsetTop - 140) current = sec;
+    });
+    navLinks.forEach(link => {
+      link.classList.toggle('active', link.getAttribute('href') === '#' + current.id);
+    });
+  }
+  window.addEventListener('scroll', onScroll);
+  onScroll();
+
+  // reveal clips on scroll
+  const clips = document.querySelectorAll('.clip');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) e.target.classList.add('in-view');
+    });
+  }, { threshold: 0.15 });
+  clips.forEach(c => io.observe(c));
+
+  // load youtube embed placeholder
+  function loadClip(frame, url){
+    if (url.startsWith('PASTE_')){
+      alert('Add your YouTube embed link in the code where it says "' + url + '"');
+      return;
+    }
+    const iframe = document.createElement('iframe');
+    iframe.src = url;
+    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+    iframe.allowFullscreen = true;
+    frame.appendChild(iframe);
+    frame.classList.add('loaded');
+  }
+</script>
+
+</body>
+</html>
