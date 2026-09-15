@@ -1,682 +1,340 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mohamed Rayen Akrout — Video Editor</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RAY — Mouhamed Rayen Akrout | Video Editor</title>
+<meta name="description" content="RAY — Mouhamed Rayen Akrout, video editor specializing in storytelling, documentary and social media content.">
+<meta name="theme-color" content="#070a0b">
+<meta property="og:title" content="RAY — Mouhamed Rayen Akrout, Video Editor">
+<meta property="og:description" content="Video editing for documentary, branded and social content — pacing, sound and visual rhythm.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23070a0b'/%3E%3Cpath d='M38 30 L72 50 L38 70 Z' fill='%23FF6A3D'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-
   :root{
-    --bg: #0d0c0e;
-    --surface: #17151a;
-    --surface-2: #1f1c22;
-    --hairline: #322e35;
-    --gold: #c9a15a;
-    --crimson: #8a2f2f;
-    --text: #ece7de;
-    --text-muted: #8b8590;
-    --text-dim: #57525c;
+    --bg:#070a0b;
+    --bg-raised:#0e1416;
+    --ink:#eeece6;
+    --muted:#7c8a89;
+    --line:#1a2224;
+    --warm:#ff6a3d;
+    --cool:#2bbfae;
+    --radius:14px;
   }
-
-  *{ margin:0; padding:0; box-sizing:border-box; }
-
-  html{ scroll-behavior:smooth; }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} }
 
   body{
+    margin:0;
     background:var(--bg);
-    color:var(--text);
-    font-family:'Inter', sans-serif;
-    overflow-x:hidden;
+    color:var(--ink);
+    font-family:'Barlow',Arial,Helvetica,sans-serif;
     position:relative;
   }
-
-  /* subtle film grain */
   body::before{
     content:"";
-    position:fixed; inset:0;
-    pointer-events:none;
-    z-index:999;
+    position:fixed;inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     opacity:.035;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode:overlay;
+    pointer-events:none;
+    z-index:2;
   }
 
-  .mono{ font-family:'IBM Plex Mono', monospace; }
+  a{color:inherit}
+  .wrap{width:min(1120px,92%);margin:auto}
 
-  ::selection{ background:var(--gold); color:#161217; }
+  :focus-visible{outline:2px solid var(--warm);outline-offset:3px}
 
-  a{ color:inherit; text-decoration:none; }
+  /* ---------- nav ---------- */
+  header{position:sticky;top:0;z-index:20;background:rgba(7,10,11,.82);backdrop-filter:blur(10px);border-bottom:1px solid transparent;transition:border-color .3s}
+  header.scrolled{border-color:var(--line)}
+  nav{display:flex;justify-content:space-between;align-items:center;padding:20px 0}
+  .logo{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;letter-spacing:.5px}
+  .logo::before{content:"● ";color:var(--warm);font-size:11px;vertical-align:middle}
+  .navlinks{display:flex;gap:22px}
+  .navlinks a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;transition:color .15s}
+  .navlinks a:hover{color:var(--ink)}
 
-  /* ---------- TIMELINE NAV ---------- */
-  .timeline-nav{
-    position:fixed; top:0; left:0; right:0;
-    z-index:100;
-    background:rgba(13,12,14,.9);
-    backdrop-filter:blur(10px);
-    border-bottom:1px solid var(--hairline);
+  /* ---------- hero ---------- */
+  .hero{min-height:78vh;display:flex;flex-direction:column;justify-content:center;padding:40px 0 60px;position:relative}
+  .readout{
+    display:inline-flex;align-items:center;gap:9px;
+    font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--muted);
+    margin-bottom:22px;
   }
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--warm);animation:pulse 1.4s ease-in-out infinite}
+  @media (prefers-reduced-motion: reduce){ .dot{animation:none} }
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+  #tc{color:var(--ink)}
 
-  .timeline-track{
-    position:relative;
-    height:3px;
-    background:var(--surface-2);
-  }
-
-  .timeline-fill{
-    position:absolute; top:0; left:0; height:100%;
-    background:linear-gradient(90deg, var(--crimson), var(--gold));
-    width:0%;
-    transition:width .1s linear;
-  }
-
-  .timeline-playhead{
-    position:absolute; top:-4px;
-    width:2px; height:11px;
-    background:var(--gold);
-    box-shadow:0 0 8px var(--gold);
-    transform:translateX(-1px);
-    left:0%;
-    transition:left .1s linear;
-  }
-
-  .timeline-chapters{
-    display:flex; align-items:center; justify-content:space-between;
-    max-width:1160px; margin:0 auto;
-    padding:14px 24px;
-  }
-
-  .tc-brand{
-    font-family:'Big Shoulders Display', sans-serif;
-    font-weight:700;
-    font-size:15px;
-    letter-spacing:.06em;
-    color:var(--text);
-  }
-
-  .tc-brand span{ color:var(--gold); }
-
-  .tc-links{
-    display:flex; gap:28px;
-    list-style:none;
-  }
-
-  .tc-links li a{
-    font-size:11px;
-    letter-spacing:.12em;
-    color:var(--text-muted);
-    display:flex; align-items:baseline; gap:8px;
-    transition:color .2s;
-  }
-
-  .tc-links li a .tc-code{
-    color:var(--text-dim);
-    font-size:10px;
-  }
-
-  .tc-links li a:hover, .tc-links li a.active{ color:var(--gold); }
-  .tc-links li a:hover .tc-code, .tc-links li a.active .tc-code{ color:var(--crimson); }
-
-  @media (max-width:720px){
-    .tc-links{ display:none; }
-  }
-
-  /* ---------- SECTIONS ---------- */
-  section{
-    max-width:1160px;
-    margin:0 auto;
-    padding:0 24px;
-  }
-
-  /* ---------- HERO ---------- */
-  .hero{
-    min-height:100vh;
-    display:flex; flex-direction:column; justify-content:center;
-    padding-top:80px;
-    position:relative;
-  }
-
-  .slate-frame{
-    border:1px solid var(--hairline);
-    padding:32px clamp(20px,4vw,48px);
-    position:relative;
-    background:linear-gradient(180deg, rgba(201,161,90,.03), transparent 40%);
-  }
-
-  .slate-frame::before, .slate-frame::after{
-    content:"";
-    position:absolute;
-    width:18px; height:18px;
-    border:1px solid var(--gold);
-    opacity:.5;
-  }
-  .slate-frame::before{ top:-1px; left:-1px; border-right:none; border-bottom:none; }
-  .slate-frame::after{ bottom:-1px; right:-1px; border-left:none; border-top:none; }
-
-  .slate-row{
-    display:flex; flex-wrap:wrap; gap:10px 28px;
-    margin-bottom:28px;
-    font-size:11px; letter-spacing:.1em;
-    color:var(--text-dim);
-  }
-  .slate-row span b{ color:var(--text-muted); font-weight:500; }
-
-  .hero-name{
-    font-family:'Big Shoulders Display', sans-serif;
+  h1{
+    font-family:'Barlow Condensed',sans-serif;
     font-weight:800;
-    font-size:clamp(48px, 9vw, 118px);
-    line-height:.92;
-    letter-spacing:-.01em;
-    text-transform:uppercase;
+    font-size:clamp(42px,9vw,96px);
+    line-height:.96;
+    letter-spacing:-.5px;
+    margin:0 0 22px;
+    max-width:14ch;
   }
+  .hero p{max-width:560px;color:var(--muted);font-size:18px;line-height:1.7;margin:0 0 30px}
 
-  .hero-name .last{ color:var(--gold); }
-
-  .hero-role{
-    margin-top:20px;
-    display:flex; align-items:center; gap:14px;
-    font-size:clamp(14px,2vw,18px);
-    color:var(--text-muted);
+  .btn{
+    display:inline-flex;align-items:center;gap:10px;
+    background:var(--ink);color:#08100f;
+    padding:14px 22px;border-radius:999px;
+    text-decoration:none;font-weight:600;font-size:15px;
+    transition:transform .15s ease;
   }
+  .btn:hover{transform:translateY(-2px)}
+  .btn .tri{width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:9px solid #08100f}
 
-  .rec-dot{
-    width:8px; height:8px; border-radius:50%;
-    background:var(--crimson);
-    box-shadow:0 0 10px var(--crimson);
-    animation:blink 2s infinite;
-    flex-shrink:0;
+  .scrub{margin-top:56px;height:2px;background:var(--line);position:relative;overflow:hidden;border-radius:2px}
+  .scrub span{position:absolute;left:0;top:0;bottom:0;width:32%;background:linear-gradient(90deg,var(--warm),var(--cool))}
+
+  /* ---------- section shell ---------- */
+  .section{padding:76px 0;border-top:1px solid var(--line)}
+  .section-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:34px;gap:20px}
+  h2{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:clamp(30px,4vw,42px);margin:0;letter-spacing:-.3px}
+  .count{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--muted)}
+
+  /* ---------- work / clips ---------- */
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+  .clip{background:var(--bg-raised);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  .clip-bar{height:4px}
+  .clip:nth-child(odd) .clip-bar{background:var(--warm)}
+  .clip:nth-child(even) .clip-bar{background:var(--cool)}
+
+  .thumb-link{display:block;position:relative;text-decoration:none}
+  .thumb{aspect-ratio:16/9;overflow:hidden;position:relative;background:#000}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s ease}
+  .thumb-link:hover .thumb img,.thumb-link:focus-visible .thumb img{transform:scale(1.045)}
+
+  .thumb::after{ /* corner brackets, viewfinder-style */
+    content:"";position:absolute;inset:10px;
+    border:1.5px solid rgba(238,236,230,0);
+    border-image:none;
+    -webkit-mask:
+      linear-gradient(#000,#000) top left/16px 1.5px no-repeat,
+      linear-gradient(#000,#000) top left/1.5px 16px no-repeat,
+      linear-gradient(#000,#000) top right/16px 1.5px no-repeat,
+      linear-gradient(#000,#000) top right/1.5px 16px no-repeat,
+      linear-gradient(#000,#000) bottom left/16px 1.5px no-repeat,
+      linear-gradient(#000,#000) bottom left/1.5px 16px no-repeat,
+      linear-gradient(#000,#000) bottom right/16px 1.5px no-repeat,
+      linear-gradient(#000,#000) bottom right/1.5px 16px no-repeat;
+    background:var(--ink);
+    opacity:0;transition:opacity .2s ease;
   }
+  .thumb-link:hover .thumb::after,.thumb-link:focus-visible .thumb::after{opacity:.9}
 
-  @keyframes blink{
-    0%,100%{ opacity:1; }
-    50%{ opacity:.25; }
+  .play{
+    position:absolute;inset:0;margin:auto;width:52px;height:52px;border-radius:50%;
+    background:rgba(7,10,11,.55);border:1px solid rgba(238,236,230,.4);
+    display:grid;place-items:center;pointer-events:none;
   }
+  .play .tri{width:0;height:0;border-top:7px solid transparent;border-bottom:7px solid transparent;border-left:11px solid var(--ink);margin-left:3px}
 
-  .scroll-cue{
-    margin-top:60px;
-    display:flex; align-items:center; gap:12px;
-    font-size:10px; letter-spacing:.15em;
-    color:var(--text-dim);
+  .clip-body{padding:18px 20px 20px}
+  .take{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted)}
+  .clip-body h3{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:700;margin:8px 0 6px}
+  .clip-body p{color:var(--muted);margin:0;font-size:14.5px}
+
+  .highlight{
+    margin-top:26px;padding:24px 26px;border:1px solid var(--line);border-radius:var(--radius);
+    background:var(--bg-raised);display:flex;gap:18px;align-items:flex-start;
   }
-
-  .scroll-cue .bar{
-    width:1px; height:34px;
-    background:var(--hairline);
-    position:relative;
-    overflow:hidden;
+  .highlight .slate{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);
+    border:1px solid var(--line);border-radius:6px;padding:4px 8px;white-space:nowrap;margin-top:3px;
   }
-  .scroll-cue .bar::after{
-    content:"";
-    position:absolute; top:-100%; left:0;
-    width:100%; height:100%;
-    background:var(--gold);
-    animation:scrollbar 1.8s infinite;
+  .highlight strong{display:block;font-size:17px;margin-bottom:4px}
+  .highlight p{color:var(--muted);margin:0;font-size:14.5px;line-height:1.6}
+
+  /* ---------- about ---------- */
+  .about{display:grid;grid-template-columns:.9fr 1.1fr;gap:56px}
+  .about p{color:var(--muted);line-height:1.8;font-size:16.5px}
+  .keyframes{list-style:none;margin:28px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:14px 24px}
+  .keyframes li{display:flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--muted)}
+  .keyframes li::before{content:"";width:8px;height:8px;background:var(--warm);transform:rotate(45deg);flex:none}
+  .keyframes li:nth-child(even)::before{background:var(--cool)}
+
+  /* ---------- contact ---------- */
+  .contact-inner{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;flex-wrap:wrap}
+  #contact p{color:var(--muted);font-size:17px;margin:10px 0 0;max-width:44ch}
+
+  /* ---------- footer ---------- */
+  footer{padding:30px 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+  footer .who{color:var(--muted);font-size:14px}
+  footer .who strong{color:var(--ink);font-weight:600}
+  footer .stamp{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted)}
+
+  @media(max-width:760px){
+    .navlinks{gap:14px}
+    .navlinks a{font-size:13px}
+    .grid,.about{grid-template-columns:1fr}
+    .section{padding:56px 0}
+    .highlight{flex-direction:column}
+    .contact-inner{align-items:flex-start}
   }
-  @keyframes scrollbar{
-    0%{ top:-100%; }
-    100%{ top:100%; }
-  }
-
-  /* ---------- SECTION HEADERS ---------- */
-  .sec-head{
-    display:flex; align-items:baseline; gap:16px;
-    margin-bottom:52px;
-  }
-
-  .sec-num{
-    font-family:'IBM Plex Mono', monospace;
-    font-size:12px;
-    color:var(--crimson);
-  }
-
-  .sec-title{
-    font-family:'Big Shoulders Display', sans-serif;
-    font-weight:700;
-    font-size:clamp(30px,4vw,44px);
-    text-transform:uppercase;
-    letter-spacing:.01em;
-  }
-
-  .sec-line{
-    flex:1;
-    height:1px;
-    background:var(--hairline);
-  }
-
-  /* ---------- WORK ---------- */
-  .work{ padding-top:140px; padding-bottom:100px; }
-
-  .reel{
-    display:grid;
-    grid-template-columns:repeat(2, 1fr);
-    gap:2px;
-    background:var(--hairline);
-    border:1px solid var(--hairline);
-  }
-
-  @media (max-width:720px){
-    .reel{ grid-template-columns:1fr; }
-  }
-
-  .clip{
-    background:var(--surface);
-    position:relative;
-    opacity:0;
-    transform:translateY(24px);
-    transition:opacity .6s ease, transform .6s ease;
-  }
-  .clip.in-view{ opacity:1; transform:translateY(0); }
-
-  .clip-frame{
-    aspect-ratio:16/9;
-    position:relative;
-    background:
-      repeating-linear-gradient(115deg, rgba(255,255,255,.02) 0 2px, transparent 2px 6px),
-      linear-gradient(150deg, #201c24, #121014);
-    overflow:hidden;
-    cursor:pointer;
-  }
-
-  .clip-frame iframe{
-    position:absolute; inset:0;
-    width:100%; height:100%;
-    border:0;
-    display:none;
-  }
-
-  .clip-frame.loaded .clip-placeholder{ display:none; }
-  .clip-frame.loaded iframe{ display:block; }
-
-  .clip-placeholder{
-    position:absolute; inset:0;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:14px;
-  }
-
-  .play-btn{
-    width:56px; height:56px;
-    border-radius:50%;
-    border:1px solid var(--gold);
-    display:flex; align-items:center; justify-content:center;
-    transition:transform .25s, background .25s;
-  }
-  .clip-frame:hover .play-btn{
-    transform:scale(1.08);
-    background:rgba(201,161,90,.1);
-  }
-
-  .play-btn svg{ width:16px; height:16px; fill:var(--gold); margin-left:2px; }
-
-  .placeholder-label{
-    font-family:'IBM Plex Mono', monospace;
-    font-size:10px;
-    letter-spacing:.1em;
-    color:var(--text-dim);
-    text-align:center;
-    padding:0 20px;
-  }
-
-  .frame-tc{
-    position:absolute; top:10px; left:12px;
-    font-family:'IBM Plex Mono', monospace;
-    font-size:10px;
-    color:var(--text-dim);
-    letter-spacing:.05em;
-  }
-
-  .frame-tag{
-    position:absolute; top:10px; right:12px;
-    font-family:'IBM Plex Mono', monospace;
-    font-size:9px;
-    letter-spacing:.1em;
-    padding:3px 8px;
-    border:1px solid var(--hairline);
-    color:var(--text-muted);
-    background:rgba(13,12,14,.6);
-  }
-
-  .clip-meta{
-    padding:18px 20px 22px;
-    border-top:1px solid var(--hairline);
-  }
-
-  .clip-title{
-    font-family:'Big Shoulders Display', sans-serif;
-    font-weight:600;
-    font-size:22px;
-    text-transform:uppercase;
-    letter-spacing:.01em;
-    margin-bottom:6px;
-  }
-
-  .clip-desc{
-    font-size:13px;
-    color:var(--text-muted);
-    line-height:1.5;
-  }
-
-  .edit-note{
-    margin-top:36px;
-    font-size:11px;
-    color:var(--text-dim);
-    font-family:'IBM Plex Mono', monospace;
-    border-left:2px solid var(--crimson);
-    padding-left:14px;
-    line-height:1.7;
-  }
-
-  /* ---------- ABOUT ---------- */
-  .about{ padding:80px 24px 100px; }
-
-  .about-grid{
-    display:grid;
-    grid-template-columns:1fr 1.4fr;
-    gap:56px;
-  }
-
-  @media (max-width:820px){
-    .about-grid{ grid-template-columns:1fr; }
-  }
-
-  .about-tag{
-    font-family:'IBM Plex Mono', monospace;
-    font-size:11px;
-    color:var(--gold);
-    letter-spacing:.1em;
-    display:block;
-    margin-bottom:18px;
-  }
-
-  .about-text p{
-    font-size:16px;
-    line-height:1.75;
-    color:var(--text-muted);
-    margin-bottom:20px;
-    max-width:60ch;
-  }
-
-  .about-text strong{ color:var(--text); font-weight:600; }
-
-  .about-stats{
-    display:flex; flex-direction:column; gap:0;
-    border-top:1px solid var(--hairline);
-  }
-
-  .stat-row{
-    display:flex; justify-content:space-between;
-    padding:16px 0;
-    border-bottom:1px solid var(--hairline);
-    font-size:13px;
-  }
-
-  .stat-row .label{ color:var(--text-dim); letter-spacing:.08em; text-transform:uppercase; font-size:11px; }
-  .stat-row .val{ color:var(--text); font-family:'IBM Plex Mono', monospace; font-size:12px; }
-
-  /* ---------- CONTACT ---------- */
-  .contact{
-    padding:60px 24px 140px;
-    text-align:center;
-  }
-
-  .contact-title{
-    font-family:'Big Shoulders Display', sans-serif;
-    font-weight:800;
-    font-size:clamp(36px,6vw,72px);
-    text-transform:uppercase;
-    line-height:1;
-    margin-bottom:28px;
-  }
-
-  .contact-title .cut{ color:var(--gold); }
-
-  .contact-sub{
-    color:var(--text-muted);
-    font-size:15px;
-    max-width:44ch;
-    margin:0 auto 40px;
-    line-height:1.6;
-  }
-
-  .contact-btn{
-    display:inline-flex; align-items:center; gap:12px;
-    padding:16px 32px;
-    border:1px solid var(--gold);
-    color:var(--gold);
-    font-family:'IBM Plex Mono', monospace;
-    font-size:13px;
-    letter-spacing:.08em;
-    transition:background .25s, color .25s;
-  }
-
-  .contact-btn:hover{
-    background:var(--gold);
-    color:#161217;
-  }
-
-  footer{
-    border-top:1px solid var(--hairline);
-    padding:24px;
-    text-align:center;
-    font-size:10px;
-    letter-spacing:.1em;
-    color:var(--text-dim);
-    font-family:'IBM Plex Mono', monospace;
-  }
-
 </style>
 </head>
 <body>
+<header id="siteHeader">
+  <div class="wrap">
+    <nav>
+      <div class="logo">RAY</div>
+      <div class="navlinks"><a href="#work">Work</a><a href="#about">About</a><a href="#contact">Contact</a></div>
+    </nav>
+  </div>
+</header>
 
-  <!-- TIMELINE NAV -->
-  <nav class="timeline-nav">
-    <div class="timeline-chapters">
-      <div class="tc-brand">M.R<span>.</span>AKROUT</div>
-      <ul class="tc-links">
-        <li><a href="#hero" class="nav-link active"><span class="tc-code">00:00</span>HOME</a></li>
-        <li><a href="#work" class="nav-link"><span class="tc-code">00:15</span>WORK</a></li>
-        <li><a href="#about" class="nav-link"><span class="tc-code">00:32</span>ABOUT</a></li>
-        <li><a href="#contact" class="nav-link"><span class="tc-code">00:48</span>CONTACT</a></li>
-      </ul>
-    </div>
-    <div class="timeline-track">
-      <div class="timeline-fill" id="timelineFill"></div>
-      <div class="timeline-playhead" id="timelinePlayhead"></div>
-    </div>
-  </nav>
+<main class="wrap">
 
-  <!-- HERO -->
-  <section class="hero" id="hero">
-    <div class="slate-frame">
-      <div class="slate-row">
-        <span><b>ROLE</b> — EDITOR</span>
-        <span><b>TOOL</b> — PREMIERE PRO</span>
-        <span><b>STATUS</b> — SELF-TAUGHT</span>
-        <span><b>TAKE</b> — 001</span>
-        <span><b>DATE</b> — 2026</span>
-      </div>
-      <h1 class="hero-name">MOHAMED RAYEN<br><span class="last">AKROUT</span></h1>
-      <div class="hero-role">
-        <span class="rec-dot"></span>
-        Video Editor — cutting across narrative, social, and branded work
-      </div>
-      <div class="scroll-cue">
-        <div class="bar"></div>
-        SCROLL
-      </div>
+  <section class="hero">
+    <div class="readout"><span class="dot" aria-hidden="true"></span>REC <span id="tc">00:00:00:00</span></div>
+    <h1>Every cut earns its place.</h1>
+    <p>I'm RAY — a video editor working across documentary, branded and social content, shaping pacing, sound and visual rhythm until a story holds together.</p>
+    <a class="btn" href="#work"><span class="tri" aria-hidden="true"></span>Watch the reel</a>
+    <div class="scrub" aria-hidden="true"><span></span></div>
+  </section>
+
+  <section id="work" class="section">
+    <div class="section-head">
+      <h2>Recent cuts</h2>
+      <div class="count">8 clips</div>
+    </div>
+    <div class="grid">
+
+      <article class="clip"><div class="clip-bar"></div>
+        <a class="thumb-link" href="https://youtu.be/PJBPSZmm1Uc" target="_blank" rel="noopener">
+          <div class="thumb"><img src="https://i.ytimg.com/vi/PJBPSZmm1Uc/hqdefault.jpg" alt="Hyena and python wildlife encounter thumbnail" loading="lazy" decoding="async"><span class="play"><span class="tri"></span></span></div>
+        </a>
+        <div class="clip-body"><span class="take">Clip 01</span><h3>Hyena vs. Python</h3><p>Wildlife documentary</p></div>
+      </article>
+
+      <article class="clip"><div class="clip-bar"></div>
+        <a class="thumb-link" href="https://youtu.be/iMPM3xo2_Y0" target="_blank" rel="noopener">
+          <div class="thumb"><img src="https://i.ytimg.com/vi/iMPM3xo2_Y0/hqdefault.jpg" alt="Meet the Team teaser thumbnail" loading="lazy" decoding="async"><span class="play"><span class="tri"></span></span></div>
+        </a>
+        <div class="clip-body"><span class="take">Clip 02</span><h3>Meet the Team</h3><p>Team intro teaser</p></div>
+      </article>
+
+      <article class="clip"><div class="clip-bar"></div>
+        <a class="thumb-link" href="https://youtu.be/GSCeRL0jg7A" target="_blank" rel="noopener">
+          <div class="thumb"><img src="https://i.ytimg.com/vi/GSCeRL0jg7A/hqdefault.jpg" alt="Enactus motion graphics project thumbnail" loading="lazy" decoding="async"><span class="play"><span class="tri"></span></span></div>
+        </a>
+        <div class="clip-body"><span class="take">Clip 03</span><h3>Enactus Recap</h3><p>Motion graphics, After Effects</p></div>
+      </article>
+
+      <article class="clip"><div class="clip-bar"></div>
+        <a class="thumb-link" href="https://youtu.be/joYXgYYmYXo" target="_blank" rel="noopener">
+          <div class="thumb"><img src="https://i.ytimg.com/vi/joYXgYYmYXo/hqdefault.jpg" alt="Daily routine relatable content thumbnail" loading="lazy" decoding="async"><span class="play"><span class="tri"></span></span></div>
+        </a>
+        <div class="clip-body"><span class="take">Clip 04</span><h3>The Daily Grind</h3><p>Social content, everyday routine</p></div>
+      </article>
+
+      <article class="clip"><div class="clip-bar"></div>
+        <a class="thumb-link" href="https://youtu.be/HnfryaKnRcw" target="_blank" rel="noopener">
+          <div class="thumb"><img src="https://i.ytimg.com/vi/HnfryaKnRcw/hqdefault.jpg" alt="Wildlife storytelling thumbnail" loading="lazy" decoding="async"><span class="play"><span class="tri"></span></span></div>
+        </a>
+        <div class="clip-body"><span class="take">Clip 05</span><h3>The Watering Hole</h3><p>Wildlife documentary</p></div>
+      </article>
+
+      <article class="clip"><div class="clip-bar"></div>
+        <a class="thumb-link" href="https://youtu.be/fDIT9AaqdmA" target="_blank" rel="noopener">
+          <div class="thumb"><img src="https://i.ytimg.com/vi/fDIT9AaqdmA/hqdefault.jpg" alt="Wildlife storytelling thumbnail" loading="lazy" decoding="async"><span class="play"><span class="tri"></span></span></div>
+        </a>
+        <div class="clip-body"><span class="take">Clip 06</span><h3>Nightfall on the Savanna</h3><p>Wildlife documentary</p></div>
+      </article>
+
+      <article class="clip"><div class="clip-bar"></div>
+        <a class="thumb-link" href="https://youtu.be/p87HrW17i9g" target="_blank" rel="noopener">
+          <div class="thumb"><img src="https://i.ytimg.com/vi/p87HrW17i9g/hqdefault.jpg" alt="Wildlife storytelling thumbnail" loading="lazy" decoding="async"><span class="play"><span class="tri"></span></span></div>
+        </a>
+        <div class="clip-body"><span class="take">Clip 07</span><h3>The Long Migration</h3><p>Wildlife documentary</p></div>
+      </article>
+
+      <article class="clip"><div class="clip-bar"></div>
+        <a class="thumb-link" href="https://youtu.be/6molDu7EcDo" target="_blank" rel="noopener">
+          <div class="thumb"><img src="https://i.ytimg.com/vi/6molDu7EcDo/hqdefault.jpg" alt="Wildlife storytelling thumbnail" loading="lazy" decoding="async"><span class="play"><span class="tri"></span></span></div>
+        </a>
+        <div class="clip-body"><span class="take">Clip 08</span><h3>Silent Predator</h3><p>Wildlife documentary</p></div>
+      </article>
+
+    </div>
+
+    <div class="highlight">
+      <span class="slate">B-ROLL</span>
+      <div><strong>Full production</strong><p>Lunch Day and Meet the Team — scriptwriting, filming and editing handled start to finish by RAY.</p></div>
     </div>
   </section>
 
-  <!-- WORK -->
-  <section class="work" id="work">
-    <div class="sec-head">
-      <span class="sec-num">01</span>
-      <h2 class="sec-title">Selected Work</h2>
-      <div class="sec-line"></div>
-    </div>
-
-    <div class="reel">
-
-      <!-- CLIP 01 -->
-      <div class="clip">
-        <div class="clip-frame" onclick="loadClip(this, 'https://www.youtube-nocookie.com/embed/6molDu7EcDo')">
-          <span class="frame-tc mono">00:00:04:12</span>
-          <span class="frame-tag">MUSIC VIDEO</span>
-          <div class="clip-placeholder">
-            <div class="play-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
-            <span class="placeholder-label">CLICK TO<br>PLAY</span>
-          </div>
-        </div>
-        <div class="clip-meta">
-          <div class="clip-title">Enactus Meet The Team</div>
-          <div class="clip-desc"> Meet the team music video for enactors club , i had only 24 hours deadline ,scripting ,shooting,editing all done by me, i used Adobe adobe premier.</div>
-        </div>
-      </div>
-
-      <!-- CLIP 02 -->
-      <div class="clip">
-        <div class="clip-frame" onclick="loadClip(this, 'https://www.youtube-nocookie.com/embed/fDIT9AaqdmA')">
-          <span class="frame-tc mono">00:01:22:03</span>
-          <span class="frame-tag">BRANDED</span>
-          <div class="clip-placeholder">
-            <div class="play-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
-            <span class="placeholder-label">CLICK TO<br>PLAY</span>
-          </div>
-        </div>
-        <div class="clip-meta">
-          <div class="clip-title">ENACTUS</div>
-          <div class="clip-desc">ENACTUS LOGO ANIMATION, ADOBE AFTER EFFECTS.</div>
-        </div>
-      </div>
-
-      <!-- CLIP 03 -->
-      <div class="clip">
-        <div class="clip-frame" onclick="loadClip(this, 'https://www.youtube-nocookie.com/embed/e0wWnAOcXKc')">
-          <span class="frame-tc mono">00:00:47:19</span>
-          <span class="frame-tag">BRANDED</span>
-          <div class="clip-placeholder">
-            <div class="play-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
-            <span class="placeholder-label">CLICK TO<br>PLAY</span>
-          </div>
-        </div>
-        <div class="clip-meta">
-          <div class="clip-title">NATURE LOGO AE</div>
-          <div class="clip-desc">A RANDOM PROJECT ON YOUTUBE AE ANIMATION — APPLYING WHAT I LEARNED, Adobe AFTER EFFECTS.</div>
-        </div>
-      </div>
-
-      <!-- CLIP 04 -->
-      <div class="clip">
-        <div class="clip-frame" onclick="loadClip(this, 'https://www.youtube-nocookie.com/embed/p87HrW17i9g?si=_mG0MBKH2XzTar-z')">
-          <span class="frame-tc mono">00:02:05:08</span>
-          <span class="frame-tag">SHORT-FORM</span>
-          <div class="clip-placeholder">
-            <div class="play-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
-            <span class="placeholder-label">CLICK TO<br>PLAY</span>
-          </div>
-        </div>
-        <div class="clip-meta">
-          <div class="clip-title">LAUNCH DAY</div>
-          <div class="clip-desc">ENACTUS LAUNCH DAY VIDEO  — DESCRIBING THE BORING ROOTINE OF A STUDENT, A 1 DAY DEADLINE, ADOBE PREMIER PRO,OBS,AFTER EFFECTS.</div>
-        </div>
-      </div>
-
-    </div>
-
-   
-  </section>
-
-  <!-- ABOUT -->
-  <section class="about" id="about">
-    <div class="sec-head">
-      <span class="sec-num">02</span>
-      <h2 class="sec-title">About</h2>
-      <div class="sec-line"></div>
-    </div>
-
-    <div class="about-grid">
+  <section id="about" class="section">
+    <div class="about">
+      <div><h2>More than<br>just editing.</h2></div>
       <div>
-        <span class="about-tag">// NO FILM SCHOOL, JUST HOURS IN THE TIMELINE</span>
-        <div class="about-stats">
-          <div class="stat-row"><span class="label">Background</span><span class="val">SELF-TAUGHT</span></div>
-          <div class="stat-row"><span class="label">Main Tool</span><span class="val">PREMIERE PRO</span></div>
-          <div class="stat-row"><span class="label">Focus</span><span class="val">MIX / GENRE-AGNOSTIC</span></div>
-          <div class="stat-row"><span class="label">Based</span><span class="val">TUNIS, TN</span></div>
-        </div>
-      </div>
-      <div class="about-text">
-        <p>I'm <strong>Mohamed Rayen Akrout</strong>, a self-taught video editor. I didn't learn this craft in a classroom — I learned it by opening the software, making mistakes, and figuring out why a cut works before I could name the technique.</p>
-        <p>That path keeps me curious. I move across <strong>short-form, narrative, branded, and music video</strong> work because I like learning the rhythm each format demands, rather than settling into one lane too early.</p>
-        <p>I'm early in my career, but every project is treated as the next rung — a chance to tighten pacing, sharpen sound design, and get closer to cuts that disappear into the story instead of calling attention to themselves.</p>
+        <p>I build videos with attention to rhythm, storytelling and visual clarity — across documentary and narrative formats, social media content and creative production.</p>
+        <p>For selected projects, I also handle the full process, from the first script to filming and the final edit.</p>
+        <ul class="keyframes">
+          <li>Video editing</li><li>Storytelling</li><li>Documentary</li>
+          <li>Social media</li><li>Motion graphics</li><li>Sound design</li>
+        </ul>
       </div>
     </div>
   </section>
 
-  <!-- CONTACT -->
-  <section class="contact" id="contact">
-    <div class="sec-head" style="justify-content:center;">
-      <span class="sec-num">03</span>
-      <h2 class="sec-title">Contact</h2>
-      <div class="sec-line"></div>
+  <section id="contact" class="section">
+    <div class="contact-inner">
+      <div>
+        <h2>Have a story<br>to tell?</h2>
+        <p>Get in touch for video editing, storytelling and social media projects.</p>
+      </div>
+      <a class="btn" href="mailto:mouhammedrayenakrout@gmail.com"><span class="tri" aria-hidden="true"></span>Start a project</a>
     </div>
-    <h3 class="contact-title">LET'S CUT<br>SOMETHING<span class="cut"> TOGETHER.</span></h3>
-    <p class="contact-sub">Have a project in mind? Send over the footage, the reference, or just the idea — I'll take it from there.</p>
-    <a class="contact-btn" href="mailto:mouhammedrayenakrout@gmail.com">
-      mouhammedrayenakrout@gmail.com →
-    </a>
   </section>
 
+</main>
+
+<div class="wrap">
   <footer>
-    MOHAMED RAYEN AKROUT — VIDEO EDITOR — © 2026
+    <div class="who"><strong>RAY</strong> · Mouhamed Rayen Akrout — Video Editor</div>
+    <div class="stamp">© 2026</div>
   </footer>
+</div>
 
 <script>
-  // timeline scrubber progress
-  const fill = document.getElementById('timelineFill');
-  const playhead = document.getElementById('timelinePlayhead');
-  const navLinks = document.querySelectorAll('.nav-link');
-  const sections = ['hero','work','about','contact'].map(id => document.getElementById(id));
+(function(){
+  var header = document.getElementById('siteHeader');
+  window.addEventListener('scroll', function(){
+    header.classList.toggle('scrolled', window.scrollY > 8);
+  }, {passive:true});
 
-  function onScroll(){
-    const scrollTop = window.scrollY;
-    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-    fill.style.width = pct + '%';
-    playhead.style.left = pct + '%';
+  var tc = document.getElementById('tc');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!tc) return;
+  if(reduce){ tc.textContent = '00:00:02:14'; return; }
 
-    let current = sections[0];
-    sections.forEach(sec => {
-      if (scrollTop >= sec.offsetTop - 140) current = sec;
-    });
-    navLinks.forEach(link => {
-      link.classList.toggle('active', link.getAttribute('href') === '#' + current.id);
-    });
+  var fps = 24, endFrames = 62, duration = 1300, start = null;
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function render(frames){
+    var totalSec = Math.floor(frames/fps), ff = frames % fps;
+    var hh = Math.floor(totalSec/3600), mm = Math.floor((totalSec%3600)/60), ss = totalSec%60;
+    tc.textContent = pad(hh)+':'+pad(mm)+':'+pad(ss)+':'+pad(ff);
   }
-  window.addEventListener('scroll', onScroll);
-  onScroll();
-
-  // reveal clips on scroll
-  const clips = document.querySelectorAll('.clip');
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) e.target.classList.add('in-view');
-    });
-  }, { threshold: 0.15 });
-  clips.forEach(c => io.observe(c));
-
-  // load youtube embed placeholder
-  function loadClip(frame, url){
-    if (url.startsWith('PASTE_')){
-      alert('Add your YouTube embed link in the code where it says "' + url + '"');
-      return;
-    }
-    const iframe = document.createElement('iframe');
-    iframe.src = url;
-    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-    iframe.allowFullscreen = true;
-    frame.appendChild(iframe);
-    frame.classList.add('loaded');
+  function step(ts){
+    if(!start) start = ts;
+    var p = Math.min(1, (ts-start)/duration);
+    var eased = 1 - Math.pow(1-p, 3);
+    render(Math.round(eased*endFrames));
+    if(p < 1) requestAnimationFrame(step);
   }
+  requestAnimationFrame(step);
+})();
 </script>
-
 </body>
 </html>
